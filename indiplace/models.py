@@ -21,10 +21,13 @@ class ArtistInfo(models.Model):
     youtube = models.CharField(max_length=50, null=True)
     instagram = models.CharField(max_length=50, null=True)
     image = models.ImageField(upload_to='uploads/%Y/%m/%d')
+    genre = models.IntegerField()
+    is_allowed = models.BooleanField(default=False)
+    
 
 class Performance(models.Model):
-    memberId = models.ForeignKey('ArtistInfo', on_delete=models.CASCADE)
-    genre = models.ForeignKey('Genre', on_delete=models.CASCADE)
+    artistId = models.ForeignKey('ArtistInfo', on_delete=models.CASCADE)
+    genre = models.IntegerField()
     registed_dt = models.DateTimeField(auto_now_add=True)
     startTime = models.DateTimeField()
     endTime = models.DateTimeField()
@@ -36,12 +39,12 @@ class FavoriteArtist(models.Model):
     memberId = models.ForeignKey('Member', on_delete=models.CASCADE)
     artistId = models.ForeignKey('ArtistInfo', on_delete=models.CASCADE)
 
-class Genre(models.Model):
-    name = models.CharField(max_length=20)
+# class Genre(models.Model):
+#     name = models.CharField(max_length=20)
 
-class ArtistGenre(models.Model):
-    artistId = models.ForeignKey('ArtistInfo', on_delete=models.CASCADE)
-    genreId = models.ForeignKey('Genre', on_delete=models.CASCADE)
+# class ArtistGenre(models.Model):
+#     artistId = models.ForeignKey('ArtistInfo', on_delete=models.CASCADE)
+#     genreId = models.ForeignKey('Genre', on_delete=models.CASCADE)
 
 class Comment(models.Model):
     memberId = models.ForeignKey('Member', on_delete=models.CASCADE)

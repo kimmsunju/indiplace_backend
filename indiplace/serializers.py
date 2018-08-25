@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Member, ArtistInfo, Performance, Genre, FavoriteArtist, ArtistGenre
+from .models import Member, ArtistInfo, Performance, FavoriteArtist
 
 
 class ArtistInfoSerializer(serializers.ModelSerializer):
@@ -7,7 +7,7 @@ class ArtistInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ArtistInfo
-        fields = ('memberId', 'name', 'artistLocation', 'faceBook', 'youtube', 'instagram', 'image')
+        fields = ('id', 'memberId', 'name', 'artistLocation', 'faceBook', 'youtube', 'instagram', 'image')
         # fields = '__all__'
 
 class MemberSerializer(serializers.ModelSerializer):
@@ -16,23 +16,22 @@ class MemberSerializer(serializers.ModelSerializer):
         model = Member
         fields = ('id', 'name', 'emailAddress', 'sex', 'year', 'location', 'memberType', 'artist_info')
 
-class GenreSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Genre
-        fields = '__all__'
+# class GenreSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Genre
+#         fields = '__all__'
 
-class ArtistGenreSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ArtistGenre
-        fields = '__all__'
+# class ArtistGenreSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = ArtistGenre
+#         fields = '__all__'
 
 class PerformanceSerializer(serializers.ModelSerializer):
-    genre = GenreSerializer()
-    memberId = ArtistInfoSerializer()
+    artistId = ArtistInfoSerializer()
 
     class Meta:
         model = Performance
-        fields = ('memberId', 'genre', 'registed_dt', 'startTime', 'endTime', 'location', 'lat', 'lot')
+        fields = ('artistId', 'genre', 'registed_dt', 'startTime', 'endTime', 'location', 'lat', 'lot')
 
 class FavoriteArtistSerializer(serializers.ModelSerializer):
     class Meta:

@@ -1,24 +1,51 @@
 from django.http import Http404
 from rest_framework import status, mixins, generics
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from .models import Member, ArtistInfo, Performance, Genre, FavoriteArtist
-from .serializers import MemberSerializer, ArtistInfoSerializer, PerformanceSerializer, GenreSerializer, FavoriteArtistSerializer, ArtistGenreSerializer
+from rest_framework.views import APIView, exception_handler
+from rest_framework.exceptions import APIException
+from .models import Member, ArtistInfo, Performance, FavoriteArtist
+from .serializers import MemberSerializer, ArtistInfoSerializer, PerformanceSerializer, FavoriteArtistSerializer
+
+class Resultset(APIView):
+    @staticmethod
+    def resultset(key, data):
+        print('resultset')
+        return Response({'key':key, 'message':data})
+    
+class CustomApiException(APIException):
+
+    #public fields
+    key = None
+    message = None
+    detail = ';;;;'
+    status_code = None
+
+    # create constructor
+    def __init__(self, key, message):
+        #override public fields
+        CustomApiException.key = key
+        CustomApiException.message = message
 
 class Authorization(APIView):
+    def resultset(self, key, data):
+        print('resultset')
+        return Response({'key':key, 'message':data})
+        
     def post(self, request, format=None):
         accountType = self.request.data['accountType']
         id = self.request.data['id']
-        print(accountType)
-        if accountType == 'facebook':
-            queryset = Member.objects.get(faceBookId=id)
-        elif accountType == 'kakaotalk':
-            queryset = Member.objects.get(kakaoTalkId=id)
-        else:
-            return Response(serializer.errors, status=status.HTTP_404_BAD_REQUEST)
+        try:
+            if accountType == 'facebook':
+                queryset = Member.objects.get(faceBookId=id)
+            elif accountType == 'kakaotalk':
+                queryset = Member.objects.get(kakaoTalkId=id)
+            else:
+                return Response({'key': False, 'message': 'accountType 오류'})
 
-        serializer = MemberSerializer(queryset)
-        return Response(serializer.data)
+            serializer = MemberSerializer(queryset)
+            return Response({'key': True, 'message': serializer.data})
+        except Member.DoesNotExist:
+            return Response({'key': False, 'message': '해당 계정이 없음'})
 
 class MemberList(APIView):
     """
@@ -29,8 +56,8 @@ class MemberList(APIView):
         serializer = MemberSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_404_BAD_REQUEST)
+            return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED)
+        return Response({'key': False, 'message': serializer.errors})
 
 
     """
@@ -40,44 +67,57 @@ class MemberList(APIView):
     def get(self, request, format=None):
         queryset = Member.objects.all()
         serializer = MemberSerializer(queryset, many=True)
-        return Response(serializer.data)
+        return Response({'key': True, 'message': serializer.data})
 
 class MemberDetail(APIView):
     def get_object(self, pk):
         try:
+            print('ffsssssssssssssssssss')
             return Member.objects.get(pk=pk)
         except Member.DoesNotExist:
-            raise Http404
+            # return Member.objects.get(pk=pk)
+            raise CustomApiException(False, 'no data')
+            print('ffsssssssssssssssssss')
+            # return Response({'key': False, 'message': ''})
 
     """
     특정 회원 조회
     /member/{pk}
     """
     def get(self, request, pk):
-        post = self.get_object(pk)
-        serializer = MemberSerializer(post)
-        return Response(serializer.data)
+        try:
+            post = Member.objects.get(pk=pk)
+            serializer = MemberSerializer(post)
+            return Response({'key': True, 'message': serializer.data})
+        except Member.DoesNotExist:
+            return Response({'key': False, 'message': 'No data'})
+
 
     """
     특정 회원 수정
     /member/{pk}
     """
     def put(self, request, pk, format=None):
-        post = self.get_object(pk)
-        serializer = MemberSerializer(post, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+        try:
+            post = Member.objects.get(pk=pk)
+            serializer = MemberSerializer(post, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'key': True, 'message': serializer.data})
+            return Response({'key': False, 'message': serializer.errors})
+        except Member.DoesNotExist:
+            return Response({'key': False, 'message': 'No data'})
     """
     특정 회원 삭제
     /member/{pk}
     """
     def delete(self, request, pk, format=None):
-        post = self.get_object(pk)
-        post.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        try:
+            post = Member.objects.get(pk=pk)
+            post.delete()
+            return Response({'key': True, 'message': '삭제 완료'}, status=status.HTTP_204_NO_CONTENT)
+        except Member.DoesNotExist:
+            return Response({'key': False, 'message': 'No data'})
 
 class ArtistList(APIView):
     def get_queryset(self):
@@ -104,22 +144,26 @@ class ArtistList(APIView):
     """
     def post(self, request, format=None):
         serializer = ArtistInfoSerializer(data=request.data)
-        print(serializer.is_valid())
         if serializer.is_valid():
             serializer.save()
             # member테이블 memberType 변경
             self.memberUpdate()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
+            return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED)
+        return Response({'key': False, 'message': serializer.errors})
 
     """
     아티스트 리스트 조회
     /artist
     """
     def get(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
+        queryset = ArtistInfo.objects.all()
+
+        keyword = self.request.GET.get('keyword', None)
+        if keyword is not None:
+            queryset = queryset.filter(name=keyword)
         serializer = ArtistInfoSerializer(queryset, many=True)
-        return Response(serializer.data)
+        return Response({'key': True, 'message': serializer.data})
+
 
 class ArtistDetail(APIView):
     def get_object(self, pk):
@@ -134,21 +178,28 @@ class ArtistDetail(APIView):
     /artist/{pk}
     """
     def get(self, request, pk):
-        post = self.get_object(pk)
-        serializer = ArtistInfoSerializer(post)
-        return Response(serializer.data)
+        try:
+            post = ArtistInfo.objects.get(pk=pk)
+            serializer = ArtistInfoSerializer(post)
+            return Response({'key': True, 'message': serializer.data})
+        except ArtistInfo.DoesNotExist:
+            return Response({'key': False, 'message': 'No data'})
+            
 
     """
     특정 아티스트 수정
     /artist/{pk}
     """
     def put(self, request, pk, format=None):
-        post = self.get_object(pk)
-        serializer = ArtistInfoSerializer(post, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            post = ArtistInfo.objects.get(pk=pk)
+            serializer = ArtistInfoSerializer(post, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'key': True, 'message': serializer.data})
+            return Response({'key': False, 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except ArtistInfo.DoesNotExist:
+            return Response({'key': False, 'message': 'No data'})
 
 class PerformanceList(APIView):
     """
@@ -159,8 +210,8 @@ class PerformanceList(APIView):
         serializer = PerformanceSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_404_BAD_REQUEST)
+            return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED)
+        return Response({'key': False, 'message': serializer.errors})
 
     """
     공연 리스트 조회
@@ -169,7 +220,7 @@ class PerformanceList(APIView):
     def get(self, request, format=None):
         queryset = Performance.objects.all()
         serializer = PerformanceSerializer(queryset, many=True)
-        return Response(serializer.data)
+        return Response({'key': True, 'message': serializer.data})
 
 class PerformanceDetail(APIView):
     def get_object(self, pk):
@@ -185,7 +236,7 @@ class PerformanceDetail(APIView):
     def get(self, request, pk):
         post = self.get_object(pk)
         serializer = PerformanceSerializer(post)
-        return Response(serializer.data)
+        return Response({'key': True, 'message': serializer.data})
 
     """
     특정 공연 수정
@@ -196,7 +247,7 @@ class PerformanceDetail(APIView):
         serializer = PerformanceSerializer(post, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response({'key': True, 'message': serializer.data})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class GenreList(APIView):
@@ -208,7 +259,7 @@ class GenreList(APIView):
         serializer = GenreSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_404_BAD_REQUEST)
 
     """
@@ -218,7 +269,7 @@ class GenreList(APIView):
     def get(self, request, format=None):
         queryset = Genre.objects.all()
         serializer = GenreSerializer(queryset, many=True)
-        return Response(serializer.data)
+        return Response({'key': True, 'message': serializer.data})
 
 class ArtistGenreList(APIView): 
     """
@@ -237,7 +288,7 @@ class ArtistGenreList(APIView):
             else:
                 return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED)
  
 
 class FavoriteArtistList(APIView):
@@ -249,7 +300,7 @@ class FavoriteArtistList(APIView):
         serializer = GenreSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_404_BAD_REQUEST)
 
 class FavoriteArtistDetail(APIView):
@@ -271,7 +322,7 @@ class FavoriteArtistDetail(APIView):
     def get(self, request, pk):
         post = self.get_object(pk)
         serializer = PerformanceSerializer(post)
-        return Response(serializer.data)
+        return Response({'key': True, 'message': serializer.data})
 
     """
     특정 공연 수정
@@ -282,5 +333,5 @@ class FavoriteArtistDetail(APIView):
         serializer = PerformanceSerializer(post, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response({'key': True, 'message': serializer.data})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
