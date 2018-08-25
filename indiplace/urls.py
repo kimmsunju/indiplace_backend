@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 from . import views
 
 urlpatterns = [
+    path('login', views.Authorization.as_view()),
     path('member', views.MemberList.as_view()),
     path('member/<int:pk>', views.MemberDetail.as_view()),
     path('artist', views.ArtistList.as_view()),
@@ -10,4 +11,5 @@ urlpatterns = [
     path('performance', views.PerformanceList.as_view()),
     path('performance/<int:pk>', views.PerformanceDetail.as_view()),
     path('genre', views.GenreList.as_view()),
+    path('artistGenre', views.ArtistGenreList.as_view()),
 ]

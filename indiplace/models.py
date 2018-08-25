@@ -13,9 +13,10 @@ class Member(models.Model):
     registed_dt = models.DateTimeField(auto_now_add=True)
 
 class ArtistInfo(models.Model):
-    memberId = models.ForeignKey('Member', on_delete=models.CASCADE)
+    memberId = models.OneToOneField('Member', related_name='artist_info', on_delete=models.CASCADE)
+    name = models.CharField(max_length=20)
     registed_dt = models.DateTimeField(auto_now_add=True)
-    location = models.CharField(max_length=10)
+    artistLocation = models.CharField(max_length=10)
     faceBook = models.CharField(max_length=50, null=True)
     youtube = models.CharField(max_length=50, null=True)
     instagram = models.CharField(max_length=50, null=True)
@@ -39,5 +40,9 @@ class Genre(models.Model):
     name = models.CharField(max_length=20)
 
 class ArtistGenre(models.Model):
-    memberId = models.ForeignKey('ArtistInfo', on_delete=models.CASCADE)
+    artistId = models.ForeignKey('ArtistInfo', on_delete=models.CASCADE)
     genreId = models.ForeignKey('Genre', on_delete=models.CASCADE)
+
+class Comment(models.Model):
+    memberId = models.ForeignKey('Member', on_delete=models.CASCADE)
+    artistId = models.ForeignKey('ArtistInfo', on_delete=models.CASCADE)
