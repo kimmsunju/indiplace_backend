@@ -7,7 +7,7 @@ class ArtistInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ArtistInfo
-        fields = ('memberId', 'artistLocation', 'faceBook', 'youtube', 'instagram', 'image')
+        fields = ('memberId', 'name', 'artistLocation', 'faceBook', 'youtube', 'instagram', 'image')
         # fields = '__all__'
 
 class MemberSerializer(serializers.ModelSerializer):
