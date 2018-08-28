@@ -10,6 +10,5 @@ urlpatterns = [
     path('artist/<int:pk>', views.ArtistDetail.as_view()),
     path('performance', views.PerformanceList.as_view()),
     path('performance/<int:pk>', views.PerformanceDetail.as_view()),
-    path('genre', views.GenreList.as_view()),
-    path('artistGenre', views.ArtistGenreList.as_view()),
+    path('performance/main', views.PerformanceView.as_view())
 ]

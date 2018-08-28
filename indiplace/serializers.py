@@ -26,6 +26,11 @@ class MemberSerializer(serializers.ModelSerializer):
 #         model = ArtistGenre
 #         fields = '__all__'
 
+class PostPerformanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Performance
+        fields = ('artistId', 'genre', 'registed_dt', 'startTime', 'endTime', 'location', 'lat', 'lot')
+
 class PerformanceSerializer(serializers.ModelSerializer):
     artistId = ArtistInfoSerializer()
 

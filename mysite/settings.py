@@ -45,9 +45,9 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     #  'EXCEPTION_HANDLER': 'utilities.helpers.api_exceptions.custom_exception_handler',
-#     'DEFAULT_RENDERER_CLASSES': (
-#         'rest_framework.renderers.JSONRenderer'
-#     )
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer'
+    )
 }
 
 MIDDLEWARE = [

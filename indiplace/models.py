@@ -23,6 +23,7 @@ class ArtistInfo(models.Model):
     image = models.ImageField(upload_to='uploads/%Y/%m/%d')
     genre = models.IntegerField()
     is_allowed = models.BooleanField(default=False)
+    memo = models.CharField(max_length=100, null=True)
     
 
 class Performance(models.Model):
@@ -49,3 +50,4 @@ class FavoriteArtist(models.Model):
 class Comment(models.Model):
     memberId = models.ForeignKey('Member', on_delete=models.CASCADE)
     artistId = models.ForeignKey('ArtistInfo', on_delete=models.CASCADE)
+    content = models.CharField(max_length=100, null=True)
