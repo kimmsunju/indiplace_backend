@@ -45,12 +45,12 @@ class Authorization(APIView):
             elif accountType == 'kakaotalk':
                 queryset = Member.objects.get(kakaoTalkId=id)
             else:
-                return Response({'key': False, 'message': 'accountType 오류'})
+                return Response({'key': False, 'message': 'accountType 오류'}, content_type='application/json; charset=utf-8')
 
             serializer = MemberSerializer(queryset)
-            return Response({'key': True, 'message': serializer.data})
+            return Response({'key': True, 'message': serializer.data}, content_type='application/json; charset=utf-8')
         except Member.DoesNotExist:
-            return Response({'key': False, 'message': '해당 계정이 없음'})
+            return Response({'key': False, 'message': '해당 계정이 없음'}, content_type='application/json; charset=utf-8')
 
 class MemberList(APIView):
     renderer_classes = (JSONRenderer, )
@@ -63,7 +63,7 @@ class MemberList(APIView):
         serializer = MemberSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED)
+            return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED, content_type='application/json; charset=utf-8')
         return Response({'key': False, 'message': serializer.errors})
 
 
@@ -74,7 +74,7 @@ class MemberList(APIView):
     def get(self, request, format=None):
         queryset = Member.objects.all()
         serializer = MemberSerializer(queryset, many=True)
-        return Response({'key': True, 'message': serializer.data})
+        return Response({'key': True, 'message': serializer.data}, content_type='application/json; charset=utf-8')
 
 class MemberDetail(APIView):
     renderer_classes = (JSONRenderer, )
@@ -97,7 +97,7 @@ class MemberDetail(APIView):
         try:
             post = Member.objects.get(pk=pk)
             serializer = MemberSerializer(post)
-            return Response({'key': True, 'message': serializer.data})
+            return Response({'key': True, 'message': serializer.data}, content_type='application/json; charset=utf-8')
         except Member.DoesNotExist:
             return Response({'key': False, 'message': 'No data'})
 
@@ -112,7 +112,7 @@ class MemberDetail(APIView):
             serializer = MemberSerializer(post, data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                return Response({'key': True, 'message': serializer.data})
+                return Response({'key': True, 'message': serializer.data}, content_type='application/json; charset=utf-8')
             return Response({'key': False, 'message': serializer.errors})
         except Member.DoesNotExist:
             return Response({'key': False, 'message': 'No data'})
@@ -124,7 +124,7 @@ class MemberDetail(APIView):
         try:
             post = Member.objects.get(pk=pk)
             post.delete()
-            return Response({'key': True, 'message': '삭제 완료'}, status=status.HTTP_204_NO_CONTENT)
+            return Response({'key': True, 'message': '삭제 완료'}, status=status.HTTP_204_NO_CONTENT, content_type='application/json; charset=utf-8')
         except Member.DoesNotExist:
             return Response({'key': False, 'message': 'No data'})
 
@@ -158,7 +158,7 @@ class ArtistList(APIView):
         if serializer.is_valid():
             serializer.save()
             self.memberUpdate() # member테이블 memberType 변경
-            return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED)
+            return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED, content_type='application/json; charset=utf-8')
         return Response({'key': False, 'message': serializer.errors})
 
     """
@@ -172,7 +172,7 @@ class ArtistList(APIView):
         if keyword is not None:
             queryset = queryset.filter(name__icontains=keyword)
         serializer = ArtistInfoSerializer(queryset, many=True)
-        return Response({'key': True, 'message': serializer.data})
+        return Response({'key': True, 'message': serializer.data}, content_type='application/json; charset=utf-8')
 
 
 class ArtistDetail(APIView):
@@ -193,7 +193,7 @@ class ArtistDetail(APIView):
         try:
             post = ArtistInfo.objects.get(pk=pk)
             serializer = ArtistInfoSerializer(post)
-            return Response({'key': True, 'message': serializer.data})
+            return Response({'key': True, 'message': serializer.data}, content_type='application/json; charset=utf-8')
         except ArtistInfo.DoesNotExist:
             return Response({'key': False, 'message': 'No data'})
             
@@ -208,7 +208,7 @@ class ArtistDetail(APIView):
             serializer = ArtistInfoSerializer(post, data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                return Response({'key': True, 'message': serializer.data})
+                return Response({'key': True, 'message': serializer.data}, content_type='application/json; charset=utf-8')
             return Response({'key': False, 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except ArtistInfo.DoesNotExist:
             return Response({'key': False, 'message': 'No data'})
@@ -224,7 +224,7 @@ class PerformanceList(APIView):
         serializer = PostPerformanceSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED)
+            return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED, content_type='application/json; charset=utf-8')
         return Response({'key': False, 'message': serializer.errors})
 
     """
@@ -241,7 +241,7 @@ class PerformanceList(APIView):
         if genre is not None:
             queryset = queryset.filter(genre=genre)
         serializer = PerformanceSerializer(queryset, many=True)
-        return Response({'key': True, 'message': serializer.data})
+        return Response({'key': True, 'message': serializer.data}, content_type='application/json; charset=utf-8')
 
 class PerformanceView(APIView):
     renderer_classes = (JSONRenderer, )
@@ -256,7 +256,7 @@ class PerformanceView(APIView):
         if type is not None:
             queryset = queryset.filter(startTime__gt=datetime.datetime.now()).filter(location=location).order_by('startTime')
         serializer = PerformanceSerializer(queryset, many=True)
-        return Response({'key': True, 'message': serializer.data[0:5]})
+        return Response({'key': True, 'message': serializer.data[0:5]}, content_type='application/json; charset=utf-8')
 
 class PerformanceRecent(APIView):
     renderer_classes = (JSONRenderer, )
@@ -267,7 +267,7 @@ class PerformanceRecent(APIView):
     def get(self, request, format=None):
         queryset = Performance.objects.filter(startTime__gt=datetime.datetime.now()).order_by('startTime')
         serializer = PerformanceSerializer(queryset, many=True)
-        return Response({'key': True, 'message': serializer.data[0:5]})
+        return Response({'key': True, 'message': serializer.data[0:5]}, content_type='application/json; charset=utf-8')
 
 class PerformanceFavor(APIView):
     renderer_classes = (JSONRenderer, )
@@ -287,7 +287,7 @@ class PerformanceFavor(APIView):
         artistList = self.favor(pk)
         queryset = Performance.objects.filter(artistId__in=artistList).filter(startTime__gt=datetime.datetime.now()).order_by('startTime')
         serializer = PerformanceSerializer(queryset, many=True)
-        return Response({'key': True, 'message': serializer.data[0:5]})
+        return Response({'key': True, 'message': serializer.data[0:5]}, content_type='application/json; charset=utf-8')
 
 class PerformanceDetail(APIView):
     renderer_classes = (JSONRenderer, )
@@ -306,7 +306,7 @@ class PerformanceDetail(APIView):
         try:
             post = Performance.objects.get(pk=pk)
             serializer = PerformanceSerializer(post)
-            return Response({'key': True, 'message': serializer.data})
+            return Response({'key': True, 'message': serializer.data}, content_type='application/json; charset=utf-8')
         except Performance.DoesNotExist:
             return Response({'key': False, 'message': 'No data'})
 
@@ -320,7 +320,7 @@ class PerformanceDetail(APIView):
             serializer = PostPerformanceSerializer(post, data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                return Response({'key': True, 'message': serializer.data})
+                return Response({'key': True, 'message': serializer.data}, content_type='application/json; charset=utf-8')
             return Response({'key': False, 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({'key': False, 'message': 'No data'})
@@ -377,7 +377,7 @@ class FavoriteArtistList(APIView):
         serializer = FavoriteArtistSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED)
+            return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED, content_type='application/json; charset=utf-8')
         return Response({'key': False, 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 class FavoriteArtistDetail(APIView):
@@ -393,5 +393,5 @@ class FavoriteArtistDetail(APIView):
         artistList = []
         for data in serializer.data:
             artistList.append(data['artistId'])
-        return Response({'key': True, 'message': artistList})
+        return Response({'key': True, 'message': artistList}, content_type='application/json; charset=utf-8')
 
