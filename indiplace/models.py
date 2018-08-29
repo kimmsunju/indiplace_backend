@@ -33,6 +33,7 @@ class Performance(models.Model):
     startTime = models.DateTimeField()
     endTime = models.DateTimeField()
     location = models.CharField(max_length=10)
+    place = models.CharField(max_length=20, null=True)
     lat = models.IntegerField()
     lot = models.IntegerField()
 
