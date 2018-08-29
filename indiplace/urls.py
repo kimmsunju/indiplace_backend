@@ -14,7 +14,9 @@ urlpatterns = [
     path('performance/<int:pk>', views.PerformanceDetail.as_view()),
     path('performance/main', views.PerformanceView.as_view()),
     path('performance/recently', views.PerformanceRecent.as_view()),
+    path('performance/favor/<int:pk>', views.PerformanceFavor.as_view()),
     path('favorite', views.FavoriteArtistList.as_view()),
+    path('favorite/<int:pk>', views.FavoriteArtistDetail.as_view()),
 ] 
 
 # 어떤 URL을 정적으로 추가할래? > MEDIA_URL을 static 파일 경로로 추가

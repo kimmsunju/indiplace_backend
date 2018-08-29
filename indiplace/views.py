@@ -268,7 +268,26 @@ class PerformanceRecent(APIView):
         queryset = Performance.objects.filter(startTime__gt=datetime.datetime.now()).order_by('startTime')
         serializer = PerformanceSerializer(queryset, many=True)
         return Response({'key': True, 'message': serializer.data[0:5]})
-        
+
+class PerformanceFavor(APIView):
+    renderer_classes = (JSONRenderer, )
+
+    def favor(self, pk):
+        queryset = FavoriteArtist.objects.filter(memberId=pk)
+        serializer = FavoriteArtistSerializer(queryset, many=True)
+        artistList = []
+        for data in serializer.data:
+            artistList.append(data['artistId'])
+        return artistList
+
+    """
+    좋아하는 아티스트 공연리스트(5개)
+    """
+    def get(self, request, pk):
+        artistList = self.favor(pk)
+        queryset = Performance.objects.filter(artistId__in=artistList).filter(startTime__gt=datetime.datetime.now()).order_by('startTime')
+        serializer = PerformanceSerializer(queryset, many=True)
+        return Response({'key': True, 'message': serializer.data[0:5]})
 
 class PerformanceDetail(APIView):
     renderer_classes = (JSONRenderer, )
@@ -352,7 +371,7 @@ class FavoriteArtistList(APIView):
 
     """
     좋아하는 아티스트 등록
-    /genre
+    /favorite
     """
     def post(self, request, format=None):
         serializer = FavoriteArtistSerializer(data=request.data)
@@ -364,34 +383,15 @@ class FavoriteArtistList(APIView):
 class FavoriteArtistDetail(APIView):
     renderer_classes = (JSONRenderer, )
 
-    def get_object(self, pk):
-        try:
-            return Performance.objects.get(pk=pk)
-        except Performance.DoesNotExist:
-            raise Http404
-
-    # def get_queryset(self):
-    #     keyword = self.request.query_params.get('keyword')
-    #
-    #     queryset = Performance.objects.filter()
-
     """
-    특정 공연 조회
-    /performance/{pk}
+    좋아하는 아티스트 조회
+    /favorite/{pk}
     """
     def get(self, request, pk):
-        post = self.get_object(pk)
-        serializer = PerformanceSerializer(post)
-        return Response({'key': True, 'message': serializer.data})
+        queryset = FavoriteArtist.objects.filter(memberId=pk)
+        serializer = FavoriteArtistSerializer(queryset, many=True)
+        artistList = []
+        for data in serializer.data:
+            artistList.append(data['artistId'])
+        return Response({'key': True, 'message': artistList})
 
-    """
-    특정 공연 수정
-    /performance/{pk}
-    """
-    def put(self, request, pk, format=None):
-        post = self.get_object(pk)
-        serializer = PerformanceSerializer(post, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'key': True, 'message': serializer.data})
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
