@@ -254,11 +254,20 @@ class PerformanceView(APIView):
         
         location = self.request.GET.get('location', None)
         if type is not None:
-            # queryset = queryset.filter(location=location).order_by('startTime')
             queryset = queryset.filter(startTime__gt=datetime.datetime.now()).filter(location=location).order_by('startTime')
         serializer = PerformanceSerializer(queryset, many=True)
-        return Response({'key': True, 'message:': serializer.data[0:5]})
+        return Response({'key': True, 'message': serializer.data[0:5]})
 
+class PerformanceRecent(APIView):
+    renderer_classes = (JSONRenderer, )
+
+    """
+    최근 공연리스트(5개)
+    """
+    def get(self, request, format=None):
+        queryset = Performance.objects.filter(startTime__gt=datetime.datetime.now()).order_by('startTime')
+        serializer = PerformanceSerializer(queryset, many=True)
+        return Response({'key': True, 'message': serializer.data[0:5]})
         
 
 class PerformanceDetail(APIView):
@@ -346,7 +355,7 @@ class FavoriteArtistList(APIView):
     /genre
     """
     def post(self, request, format=None):
-        serializer = GenreSerializer(data=request.data)
+        serializer = FavoriteArtistSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED)
