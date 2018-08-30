@@ -5,8 +5,8 @@ from rest_framework import status, mixins, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView, exception_handler
 from rest_framework.exceptions import APIException
-from .models import Member, ArtistInfo, Performance, FavoriteArtist
-from .serializers import MemberSerializer, ArtistInfoSerializer, PerformanceSerializer, PostPerformanceSerializer, FavoriteArtistSerializer
+from .models import Member, ArtistInfo, Performance, FavoriteArtist, Comment
+from .serializers import MemberSerializer, ArtistInfoSerializer, PerformanceSerializer, PostPerformanceSerializer, FavoriteArtistSerializer, CommentSerializer, CommentListSerializer
 import datetime
 
 class Resultset(APIView):
@@ -395,3 +395,55 @@ class FavoriteArtistDetail(APIView):
             artistList.append(data['artistId'])
         return Response({'key': True, 'message': artistList}, content_type='application/json; charset=utf-8')
 
+class CommentList(APIView):
+    renderer_classes = (JSONRenderer, )
+
+    """
+    코멘트 등록
+    /comment
+    """
+    def post(self, request, format=None):
+        serializer = CommentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED, content_type='application/json; charset=utf-8')
+        return Response({'key': False, 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+class CommentDetail(APIView):
+    renderer_classes = (JSONRenderer, )
+
+    """
+    코멘트 리스트 조회
+    /comment/{pk}
+    """
+    def get(self, request, pk):
+        queryset = Comment.objects.filter(artistId=pk)
+        serializer = CommentListSerializer(queryset, many=True)
+        return Response({'key': True, 'message': serializer.data}, content_type='application/json; charset=utf-8')
+
+    """
+    특정 코멘트 수정
+    /comment/{pk}
+    """
+    def put(self, request, pk, format=None):
+        try:
+            post = Comment.objects.get(pk=pk)
+            serializer = CommentSerializer(post, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'key': True, 'message': serializer.data}, content_type='application/json; charset=utf-8')
+            return Response({'key': False, 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({'key': False, 'message': 'No data'})
+
+    """
+    특정 코멘트 삭제
+    /comment/{pk}
+    """
+    def delete(self, request, pk, format=None):
+        try:
+            post = Comment.objects.get(pk=pk)
+            post.delete()
+            return Response({'key': True, 'message': '삭제 완료'}, status=status.HTTP_204_NO_CONTENT, content_type='application/json; charset=utf-8')
+        except Member.DoesNotExist:
+            return Response({'key': False, 'message': 'No data'})

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Member, ArtistInfo, Performance, FavoriteArtist
+from .models import Member, ArtistInfo, Performance, FavoriteArtist, Comment
 
 
 class ArtistInfoSerializer(serializers.ModelSerializer):
@@ -15,6 +15,11 @@ class MemberSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Member
         fields = ('id', 'name', 'emailAddress', 'sex', 'year', 'location', 'memberType', 'artist_info')
+
+class MemberSimpleSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = Member
+        fields = ('id', 'name')
 
 # class GenreSerializer(serializers.ModelSerializer):
 #     class Meta:
@@ -42,3 +47,16 @@ class FavoriteArtistSerializer(serializers.ModelSerializer):
     class Meta:
         model = FavoriteArtist
         fields = '__all__'
+
+class CommentSerializer(serializers.ModelSerializer):
+    # memberId = MemberSerializer()
+    class Meta:
+        model = Comment
+        fields = '__all__'
+
+class CommentListSerializer(serializers.ModelSerializer):
+    memberId = MemberSimpleSerializer()
+    class Meta:
+        model = Comment
+        fields = ('id', 'memberId','content')
+
