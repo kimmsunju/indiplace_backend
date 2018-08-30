@@ -28,7 +28,6 @@ class ArtistInfo(models.Model):
 
 class Performance(models.Model):
     artistId = models.ForeignKey('ArtistInfo', on_delete=models.CASCADE)
-    genre = models.IntegerField()
     registed_dt = models.DateTimeField(auto_now_add=True)
     startTime = models.DateTimeField()
     endTime = models.DateTimeField()
