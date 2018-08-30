@@ -390,10 +390,7 @@ class FavoriteArtistDetail(APIView):
     def get(self, request, pk):
         queryset = FavoriteArtist.objects.filter(memberId=pk)
         serializer = FavoriteArtistSerializer(queryset, many=True)
-        artistList = []
-        for data in serializer.data:
-            artistList.append(data['artistId'])
-        return Response({'key': True, 'message': artistList}, content_type='application/json; charset=utf-8')
+        return Response({'key': True, 'message': serializer.data}, content_type='application/json; charset=utf-8')
 
 class CommentList(APIView):
     renderer_classes = (JSONRenderer, )

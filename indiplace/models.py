@@ -1,8 +1,8 @@
 from django.db import models
 
 class Member(models.Model):
-    faceBookId = models.CharField(max_length=10, null=True)
-    kakaoTalkId = models.CharField(max_length=15, null=True)
+    faceBookId = models.CharField(max_length=10, blank=True)
+    kakaoTalkId = models.CharField(max_length=15, blank=True)
     name = models.CharField(max_length=10)
     emailAddress = models.EmailField(max_length=254)
     sex = models.CharField(max_length=1)
@@ -17,13 +17,13 @@ class ArtistInfo(models.Model):
     name = models.CharField(max_length=20)
     registed_dt = models.DateTimeField(auto_now_add=True)
     artistLocation = models.CharField(max_length=10)
-    faceBook = models.CharField(max_length=50, null=True)
-    youtube = models.CharField(max_length=50, null=True)
-    instagram = models.CharField(max_length=50, null=True)
+    faceBook = models.CharField(max_length=50, blank=True)
+    youtube = models.CharField(max_length=50, blank=True)
+    instagram = models.CharField(max_length=50, blank=True)
     image = models.ImageField(upload_to='uploads/%Y/%m/%d')
     genre = models.IntegerField()
     is_allowed = models.BooleanField(default=False)
-    memo = models.CharField(max_length=100, null=True)
+    memo = models.CharField(max_length=100, blank=True)
     
 
 class Performance(models.Model):
@@ -32,7 +32,7 @@ class Performance(models.Model):
     startTime = models.DateTimeField()
     endTime = models.DateTimeField()
     location = models.CharField(max_length=10)
-    place = models.CharField(max_length=20, null=True)
+    place = models.CharField(max_length=20, blank=True)
     lat = models.IntegerField()
     lot = models.IntegerField()
 
@@ -50,4 +50,4 @@ class FavoriteArtist(models.Model):
 class Comment(models.Model):
     memberId = models.ForeignKey('Member', on_delete=models.CASCADE)
     artistId = models.ForeignKey('ArtistInfo', on_delete=models.CASCADE)
-    content = models.CharField(max_length=100, null=True)
+    content = models.CharField(max_length=100, blank=True)
