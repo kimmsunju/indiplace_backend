@@ -9,7 +9,7 @@ class Member(models.Model):
     year = models.IntegerField()
     location = models.CharField(max_length=10)
     memberType = models.CharField(max_length=10, default='U')
-    deviceToken = models.CharField(max_length=30)
+    deviceToken = models.CharField(max_length=250)
     registed_dt = models.DateTimeField(auto_now_add=True)
 
 class ArtistInfo(models.Model):
