@@ -2,7 +2,7 @@ from django.db import models
 
 class Member(models.Model):
     faceBookId = models.CharField(max_length=50,blank=True)
-    kakaoTalkId = models.IntegerField(blank=True)
+    kakaoTalkId = models.IntegerField(null=True)
     name = models.CharField(max_length=10)
     emailAddress = models.EmailField(max_length=254)
     sex = models.CharField(max_length=1)
@@ -34,8 +34,8 @@ class Performance(models.Model):
     genre = models.IntegerField()
     location = models.CharField(max_length=10)
     place = models.CharField(max_length=20, blank=True)
-    lat = models.IntegerField()
-    lot = models.IntegerField()
+    lat = models.FloatField()
+    lot = models.FloatField()
 
 class FavoriteArtist(models.Model):
     memberId = models.ForeignKey('Member', on_delete=models.CASCADE)
