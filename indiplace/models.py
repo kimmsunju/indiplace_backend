@@ -1,8 +1,8 @@
 from django.db import models
 
 class Member(models.Model):
-    faceBookId = models.CharField(max_length=10, blank=True)
-    kakaoTalkId = models.CharField(max_length=15, blank=True)
+    faceBookId = models.IntegerField(blank=True)
+    kakaoTalkId = models.CharField(max_length=50, blank=True)
     name = models.CharField(max_length=10)
     emailAddress = models.EmailField(max_length=254)
     sex = models.CharField(max_length=1)
@@ -31,6 +31,7 @@ class Performance(models.Model):
     registed_dt = models.DateTimeField(auto_now_add=True)
     startTime = models.DateTimeField()
     endTime = models.DateTimeField()
+    genre = models.IntegerField()
     location = models.CharField(max_length=10)
     place = models.CharField(max_length=20, blank=True)
     lat = models.IntegerField()
