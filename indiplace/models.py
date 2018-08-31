@@ -1,8 +1,8 @@
 from django.db import models
 
 class Member(models.Model):
-    faceBookId = models.IntegerField(blank=True)
-    kakaoTalkId = models.CharField(max_length=50, blank=True)
+    faceBookId = models.CharField(max_length=50,blank=True)
+    kakaoTalkId = models.IntegerField(blank=True)
     name = models.CharField(max_length=10)
     emailAddress = models.EmailField(max_length=254)
     sex = models.CharField(max_length=1)

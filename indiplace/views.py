@@ -215,6 +215,22 @@ class ArtistDetail(APIView):
 
 class PerformanceList(APIView):
     renderer_classes = (JSONRenderer, )
+    
+    def runGCM(self, memberDevicetoken):
+        memberDevicetoken
+    
+    def getMemberId(self, artistId):
+        queryset = FavoriteArtist.objects.filter(artistId=artistId)
+        serializer = FavoriteArtistSerializer(queryset, many=True)
+        memberDevicetoken = []
+        for data in serializer.data:
+            queryset = Member.objects.get(pk=data['memberId'])
+            serializer = MemberSerializer(queryset)
+            memberDevicetoken.append(serializer.data['deviceToken'])
+        
+        if len(memberDevicetoken) > 0:
+            self.runGCM(memberDevicetoken)
+        
 
     """
     공연 등록
@@ -224,6 +240,7 @@ class PerformanceList(APIView):
         serializer = PostPerformanceSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            self.getMemberId(serializer.data['artistId'])
             return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED, content_type='application/json; charset=utf-8')
         return Response({'key': False, 'message': serializer.errors})
 
