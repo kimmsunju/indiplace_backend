@@ -380,6 +380,7 @@ class FavoriteArtistList(APIView):
             return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED, content_type='application/json; charset=utf-8')
         return Response({'key': False, 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
+
 class FavoriteArtistDetail(APIView):
     renderer_classes = (JSONRenderer, )
 
@@ -391,18 +392,18 @@ class FavoriteArtistDetail(APIView):
         queryset = FavoriteArtist.objects.filter(memberId=pk)
         serializer = FavoriteArtistSerializer(queryset, many=True)
         return Response({'key': True, 'message': serializer.data}, content_type='application/json; charset=utf-8')
-
     """
     좋아하는 아티스트 삭제
     /favorite/{pk}
     """
-    def delete(self, request, pk, format=None):
+    def delete(self, request, pk):
         try:
-            post = FavoriteArtist.objects.get(pk=pk)
-            post.delete()
+            queryset = FavoriteArtist.objects.filter(pk=pk)
+            queryset.delete()
             return Response({'key': True, 'message': '삭제 완료'}, status=status.HTTP_204_NO_CONTENT, content_type='application/json; charset=utf-8')
         except FavoriteArtist.DoesNotExist:
             return Response({'key': False, 'message': 'No data'})
+
 
 class CommentList(APIView):
     renderer_classes = (JSONRenderer, )
