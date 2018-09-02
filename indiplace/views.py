@@ -255,7 +255,7 @@ class PerformanceList(APIView):
         serializer = PostPerformanceSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            self.getMemberId(serializer.data['artistId'])
+            # self.getMemberId(serializer.data['artistId'])
             return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED, content_type='application/json; charset=utf-8')
         return Response({'key': False, 'message': serializer.errors})
 
