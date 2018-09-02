@@ -6,8 +6,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView, exception_handler
 from rest_framework.exceptions import APIException
 from .models import Member, ArtistInfo, Performance, FavoriteArtist, Comment
-from .serializers import MemberSerializer, ArtistInfoSerializer, PerformanceSerializer, PostPerformanceSerializer, FavoriteArtistSerializer, CommentSerializer, CommentListSerializer
+from .serializers import MemberSerializer, ArtistInfoSerializer, PerformanceSerializer, PostPerformanceSerializer, FavoriteArtistSerializer, PostFavoriteArtistSerializer, CommentSerializer, CommentListSerializer
 import datetime
+from gcm import GCM
 
 class Resultset(APIView):
     @staticmethod
@@ -217,7 +218,22 @@ class PerformanceList(APIView):
     renderer_classes = (JSONRenderer, )
     
     def runGCM(self, memberDevicetoken):
-        memberDevicetoken
+        gcm = GCM('AIzaSyACe5g4v3-XKBDRDhK2-ORKBtPb272kj4E')
+        data = {'param1': 'value1', 'param2': 'value2'}
+
+        # Downstream message using JSON request
+        reg_ids = memberDevicetoken
+        response = gcm.json_request(registration_ids=reg_ids, data=data)
+
+        # Downstream message using JSON request with extra arguments
+        res = gcm.json_request(
+            registration_ids=reg_ids, data=data,
+            collapse_key='uptoyou', delay_while_idle=True, time_to_live=3600
+        )
+
+        # Topic Messaging
+        topic = 'topic name'
+        gcm.send_topic_message(topic=topic, data=data)
     
     def getMemberId(self, artistId):
         queryset = FavoriteArtist.objects.filter(artistId=artistId)
@@ -391,7 +407,7 @@ class FavoriteArtistList(APIView):
     /favorite
     """
     def post(self, request, format=None):
-        serializer = FavoriteArtistSerializer(data=request.data)
+        serializer = PostFavoriteArtistSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED, content_type='application/json; charset=utf-8')

@@ -100,6 +100,11 @@ class FavoriteArtistSerializer(serializers.ModelSerializer):
         model = FavoriteArtist
         fields = '__all__'
 
+class PostFavoriteArtistSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FavoriteArtist
+        fields = '__all__'
+
 class CommentSerializer(serializers.ModelSerializer):
     # memberId = MemberSerializer()
     class Meta:
