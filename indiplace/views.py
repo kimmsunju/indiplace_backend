@@ -8,7 +8,6 @@ from rest_framework.exceptions import APIException
 from .models import Member, ArtistInfo, Performance, FavoriteArtist, Comment
 from .serializers import MemberSerializer, ArtistInfoSerializer, PerformanceSerializer, PostPerformanceSerializer, FavoriteArtistSerializer, PostFavoriteArtistSerializer, CommentSerializer, CommentListSerializer
 import datetime
-from gcm import GCM
 
 class Resultset(APIView):
     @staticmethod
