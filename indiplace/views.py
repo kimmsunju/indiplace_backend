@@ -8,6 +8,7 @@ from rest_framework.exceptions import APIException
 from .models import Member, ArtistInfo, Performance, FavoriteArtist, Comment
 from .serializers import MemberSerializer, ArtistInfoSerializer, PerformanceSerializer, PostPerformanceSerializer, FavoriteArtistSerializer, PostFavoriteArtistSerializer, CommentSerializer, CommentListSerializer
 import datetime
+from pyfcm import FCMNotification
 
 class Resultset(APIView):
     @staticmethod
@@ -81,12 +82,10 @@ class MemberDetail(APIView):
 
     def get_object(self, pk):
         try:
-            print('ffsssssssssssssssssss')
             return Member.objects.get(pk=pk)
         except Member.DoesNotExist:
             # return Member.objects.get(pk=pk)
             raise CustomApiException(False, 'no data')
-            print('ffsssssssssssssssssss')
             # return Response({'key': False, 'message': ''})
 
     """
@@ -216,35 +215,27 @@ class ArtistDetail(APIView):
 class PerformanceList(APIView):
     renderer_classes = (JSONRenderer, )
     
-    def runGCM(self, memberDevicetoken):
-        gcm = GCM('AIzaSyACe5g4v3-XKBDRDhK2-ORKBtPb272kj4E')
-        data = {'param1': 'value1', 'param2': 'value2'}
+    def pushFCM(self, memberDevicetoken):
+        push_service = FCMNotification(api_key=conf["fcm"]["AIzaSyACe5g4v3-XKBDRDhK2-ORKBtPb272kj4E"])
 
         # Downstream message using JSON request
-        reg_ids = memberDevicetoken
-        response = gcm.json_request(registration_ids=reg_ids, data=data)
+        push_tokens = memberDevicetoken
+        message_title = '즐겨찾는 가수의 공연 소식'
+        message_body = '확인해보세요^^'
+        result = push_service.notify_multiple_devices(registration_ids=push_tokens, message_title=message_title, message_body=message_body)
 
-        # Downstream message using JSON request with extra arguments
-        res = gcm.json_request(
-            registration_ids=reg_ids, data=data,
-            collapse_key='uptoyou', delay_while_idle=True, time_to_live=3600
-        )
-
-        # Topic Messaging
-        topic = 'topic name'
-        gcm.send_topic_message(topic=topic, data=data)
-    
     def getMemberId(self, artistId):
         queryset = FavoriteArtist.objects.filter(artistId=artistId)
         serializer = FavoriteArtistSerializer(queryset, many=True)
         memberDevicetoken = []
         for data in serializer.data:
             queryset = Member.objects.get(pk=data['memberId'])
-            serializer = MemberSerializer(queryset)
-            memberDevicetoken.append(serializer.data['deviceToken'])
+            memberSerializer = MemberSerializer(queryset)
+            memberDevicetoken.append(memberSerializer.data['deviceToken'])
         
         if len(memberDevicetoken) > 0:
-            self.runGCM(memberDevicetoken)
+            self.pushFCM(memberDevicetoken)
+            print(memberDevicetoken)
         
 
     """
@@ -255,7 +246,7 @@ class PerformanceList(APIView):
         serializer = PostPerformanceSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            # self.getMemberId(serializer.data['artistId'])
+            self.getMemberId(serializer.data['artistId'])
             return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED, content_type='application/json; charset=utf-8')
         return Response({'key': False, 'message': serializer.errors})
 
@@ -306,7 +297,7 @@ class PerformanceFavor(APIView):
 
     def favor(self, pk):
         queryset = FavoriteArtist.objects.filter(memberId=pk)
-        serializer = FavoriteArtistSerializer(queryset, many=True)
+        serializer = PostFavoriteArtistSerializer(queryset, many=True)
         artistList = []
         for data in serializer.data:
             artistList.append(data['artistId'])
