@@ -216,13 +216,37 @@ class PerformanceList(APIView):
     renderer_classes = (JSONRenderer, )
     
     def pushFCM(self, memberDevicetoken):
-        push_service = FCMNotification(api_key=conf["fcm"]["AIzaSyACe5g4v3-XKBDRDhK2-ORKBtPb272kj4E"])
+        # fcm 푸시 메세지 요청 주소
+        url = 'https://fcm.googleapis.com/fcm/send'
+        
+        # 인증 정보(서버 키)를 헤더에 담아 전달
+        headers = {
+            'Authorization': 'key=AAAAxCxWQGY:APA91bGVSxdV30mCpyqcd1qR_xDxblIgx73FEXhC0HXX3m2BmYSLUErwXPKV8IE7RcoIi0BEJ9a3c073mTYsCulw_bWsUm1xw0xrQnSHJS4Wvp7Vot2pK4n-Je1sJAUgDs_hyumR3UTX',
+            'Content-Type': 'application/json; UTF-8',
+        }
 
-        # Downstream message using JSON request
         push_tokens = memberDevicetoken
         message_title = '즐겨찾는 가수의 공연 소식'
         message_body = '확인해보세요^^'
-        result = push_service.notify_multiple_devices(registration_ids=push_tokens, message_title=message_title, message_body=message_body)
+
+        # 보낼 내용과 대상을 지정
+        content = {
+            'registration_ids': memberDevicetoken,
+            'notification': {
+                'title': message_title,
+                'body': message_body
+            }
+        }
+
+        # json 파싱 후 requests 모듈로 FCM 서버에 요청
+        # requests.post(url, data=json.dumps(content), headers=headers)
+
+
+        # push_service = FCMNotification(api_key=conf["fcm"]["AIzaSyACe5g4v3-XKBDRDhK2-ORKBtPb272kj4E"])
+
+        # # Downstream message using JSON request
+        
+        # result = push_service.notify_multiple_devices(registration_ids=push_tokens, message_title=message_title, message_body=message_body)
 
     def getMemberId(self, artistId):
         queryset = FavoriteArtist.objects.filter(artistId=artistId)
