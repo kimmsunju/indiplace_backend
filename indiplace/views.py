@@ -9,6 +9,8 @@ from .models import Member, ArtistInfo, Performance, FavoriteArtist, Comment
 from .serializers import MemberSerializer, ArtistInfoSerializer, PerformanceSerializer, PostPerformanceSerializer, FavoriteArtistSerializer, PostFavoriteArtistSerializer, CommentSerializer, CommentListSerializer
 import datetime
 from pyfcm import FCMNotification
+import requests
+import json
 
 class Resultset(APIView):
     @staticmethod
@@ -239,8 +241,8 @@ class PerformanceList(APIView):
         }
 
         # json 파싱 후 requests 모듈로 FCM 서버에 요청
-        # requests.post(url, data=json.dumps(content), headers=headers)
-
+        result = requests.post(url, data=json.dumps(content), headers=headers)
+        print(result)
 
         # push_service = FCMNotification(api_key=conf["fcm"]["AIzaSyACe5g4v3-XKBDRDhK2-ORKBtPb272kj4E"])
 
