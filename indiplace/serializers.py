@@ -92,7 +92,7 @@ class PerformanceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Performance
-        fields = ('artistId', 'registed_dt', 'startTime', 'endTime', 'location', 'lat', 'lot')
+        fields = '__all__'
 
 class FavoriteArtistSerializer(serializers.ModelSerializer):
     artistId = ArtistInfoSerializer()
