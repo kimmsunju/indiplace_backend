@@ -12,6 +12,9 @@ from pyfcm import FCMNotification
 import requests
 import json
 
+class MyError(Exception):
+    pass
+
 class Resultset(APIView):
     @staticmethod
     def resultset(key, data):
@@ -63,11 +66,25 @@ class MemberList(APIView):
     /member
     """
     def post(self, request, format=None):
-        serializer = MemberSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED, content_type='application/json; charset=utf-8')
-        return Response({'key': False, 'message': serializer.errors})
+        try:
+            serializer = MemberSerializer(data=request.data)
+            
+            if request.data['kakaoTalkId']:
+                check = Member.objects.filter(kakaoTalkId=request.data['kakaoTalkId'])
+                if len(check) > 0:
+                    return Response({'key': False, 'message': 'kakaotalk 아이디 중복'})
+            
+            if request.data['faceBookId']:
+                check = Member.objects.filter(faceBookId=request.data['faceBookId'])
+                if len(check) > 0:
+                    return Response({'key': False, 'message': 'facebook 아이디 중복'})
+
+        
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED, content_type='application/json; charset=utf-8')
+        except MyError as e:
+            return Response({'key': False, 'message': e})
 
 
     """
@@ -233,7 +250,7 @@ class PerformanceList(APIView):
 
         # 보낼 내용과 대상을 지정
         content = {
-            'registration_ids': memberDevicetoken,
+            'registration_ids': 'fejvi6bw4-I:APA91bFo7Kgs_15YnGRBxZ7xRnS7Fa9yPjxf2vQJ4fG_45F0Lt0LGOGthSucFaygGmZHFr_8W6ud_Odf6Bbh1BTvtcGSyGU7PaqnHM0rRIbeK9URKM5omqcYwWrpYA7HxLFijIweE-K7',
             'notification': {
                 'title': message_title,
                 'body': message_body
@@ -285,10 +302,11 @@ class PerformanceList(APIView):
 
         location = self.request.GET.get('location', None)
         genre = self.request.GET.get('genre', None)
+        queryset = queryset.filter(endTime__gt=datetime.datetime.now()).order_by('startTime')
         if location is not None:
-            queryset = queryset.filter(location=location)
+            queryset = queryset.filter(location=location).order_by('startTime')
         if genre is not None:
-            queryset = queryset.filter(genre=genre)
+            queryset = queryset.filter(genre=genre).order_by('startTime')
         serializer = PerformanceSerializer(queryset, many=True)
         return Response({'key': True, 'message': serializer.data}, content_type='application/json; charset=utf-8')
 
@@ -303,7 +321,7 @@ class PerformanceView(APIView):
         
         location = self.request.GET.get('location', None)
         if type is not None:
-            queryset = queryset.filter(startTime__gt=datetime.datetime.now()).filter(location=location).order_by('startTime')
+            queryset = queryset.filter(endTime__gt=datetime.datetime.now()).filter(location=location).order_by('startTime')
         serializer = PerformanceSerializer(queryset, many=True)
         return Response({'key': True, 'message': serializer.data[0:5]}, content_type='application/json; charset=utf-8')
 
@@ -314,7 +332,7 @@ class PerformanceRecent(APIView):
     최근 공연리스트(5개)
     """
     def get(self, request, format=None):
-        queryset = Performance.objects.filter(startTime__gt=datetime.datetime.now()).order_by('startTime')
+        queryset = Performance.objects.filter(endTime__gt=datetime.datetime.now()).order_by('startTime')
         serializer = PerformanceSerializer(queryset, many=True)
         return Response({'key': True, 'message': serializer.data[0:5]}, content_type='application/json; charset=utf-8')
 
@@ -334,7 +352,7 @@ class PerformanceFavor(APIView):
     """
     def get(self, request, pk):
         artistList = self.favor(pk)
-        queryset = Performance.objects.filter(artistId__in=artistList).filter(startTime__gt=datetime.datetime.now()).order_by('startTime')
+        queryset = Performance.objects.filter(artistId__in=artistList).filter(endTime__gt=datetime.datetime.now()).order_by('startTime')
         serializer = PerformanceSerializer(queryset, many=True)
         return Response({'key': True, 'message': serializer.data[0:5]}, content_type='application/json; charset=utf-8')
 
@@ -424,6 +442,9 @@ class FavoriteArtistList(APIView):
     """
     def post(self, request, format=None):
         serializer = PostFavoriteArtistSerializer(data=request.data)
+        queryset = FavoriteArtist.objects.filter(memberId=request.data['memberId']).filter(artistId=request.data['artistId'])
+        if len(queryset) > 0 :
+            return Response({'key' : False, 'message' : '중복등록'})
         if serializer.is_valid():
             serializer.save()
             return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED, content_type='application/json; charset=utf-8')
