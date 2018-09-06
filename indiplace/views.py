@@ -11,6 +11,8 @@ import datetime
 from pyfcm import FCMNotification
 import requests
 import json
+from oauth2client.service_account import ServiceAccountCredentials
+
 
 class MyError(Exception):
     pass
@@ -72,12 +74,12 @@ class MemberList(APIView):
             if request.data['kakaoTalkId']:
                 check = Member.objects.filter(kakaoTalkId=request.data['kakaoTalkId'])
                 if len(check) > 0:
-                    return Response({'key': False, 'message': 'kakaotalk 아이디 중복'})
+                    return Response({'key': False, 'message': 'kakaotalk 아이디 중복'}, content_type='application/json; charset=utf-8')
             
             if request.data['faceBookId']:
                 check = Member.objects.filter(faceBookId=request.data['faceBookId'])
                 if len(check) > 0:
-                    return Response({'key': False, 'message': 'facebook 아이디 중복'})
+                    return Response({'key': False, 'message': 'facebook 아이디 중복'}, content_type='application/json; charset=utf-8')
 
         
             if serializer.is_valid():
@@ -233,16 +235,24 @@ class ArtistDetail(APIView):
 
 class PerformanceList(APIView):
     renderer_classes = (JSONRenderer, )
+
+    def _get_access_token(self):
+        scopes = ['https://www.googleapis.com/auth/firebase.messaging']
+        credentials = ServiceAccountCredentials.from_json_keyfile_name('service-account.json', scopes)
+        access_token_info = credentials.get_access_token()
+        return access_token_info.access_token
     
     def pushFCM(self, memberDevicetoken):
         # fcm 푸시 메세지 요청 주소
-        url = 'https://fcm.googleapis.com/fcm/send'
+        url = 'https://fcm.googleapis.com/v1/projects/indiplace-214909/messages:send'
         
         # 인증 정보(서버 키)를 헤더에 담아 전달
+        auth_token ='AAAAxCxWQGY:APA91bGVSxdV30mCpyqcd1qR_xDxblIgx73FEXhC0HXX3m2BmYSLUErwXPKV8IE7RcoIi0BEJ9a3c073mTYsCulw_bWsUm1xw0xrQnSHJS4Wvp7Vot2pK4n-Je1sJAUgDs_hyumR3UTX'
         headers = {
-            'Authorization': 'key=AAAAxCxWQGY:APA91bGVSxdV30mCpyqcd1qR_xDxblIgx73FEXhC0HXX3m2BmYSLUErwXPKV8IE7RcoIi0BEJ9a3c073mTYsCulw_bWsUm1xw0xrQnSHJS4Wvp7Vot2pK4n-Je1sJAUgDs_hyumR3UTX',
+            'Authorization': 'Bearer ' + self._get_access_token(),
             'Content-Type': 'application/json; UTF-8',
         }
+        print(self._get_access_token())
 
         push_tokens = memberDevicetoken
         message_title = '즐겨찾는 가수의 공연 소식'
@@ -250,16 +260,24 @@ class PerformanceList(APIView):
 
         # 보낼 내용과 대상을 지정
         content = {
-            'registration_ids': 'fejvi6bw4-I:APA91bFo7Kgs_15YnGRBxZ7xRnS7Fa9yPjxf2vQJ4fG_45F0Lt0LGOGthSucFaygGmZHFr_8W6ud_Odf6Bbh1BTvtcGSyGU7PaqnHM0rRIbeK9URKM5omqcYwWrpYA7HxLFijIweE-K7',
-            'notification': {
-                'title': message_title,
-                'body': message_body
-            }
+            "message": {
+                "token": 'fejvi6bw4-I:APA91bFo7Kgs_15YnGRBxZ7xRnS7Fa9yPjxf2vQJ4fG_45F0Lt0LGOGthSucFaygGmZHFr_8W6ud_Odf6Bbh1BTvtcGSyGU7PaqnHM0rRIbeK9URKM5omqcYwWrpYA7HxLFijIweE-K7',
+                "notification": {
+                        'title': message_title,
+                        'body': message_body
+                    }
+            }   
+
+            # 'registration_ids': 'fejvi6bw4-I:APA91bFo7Kgs_15YnGRBxZ7xRnS7Fa9yPjxf2vQJ4fG_45F0Lt0LGOGthSucFaygGmZHFr_8W6ud_Odf6Bbh1BTvtcGSyGU7PaqnHM0rRIbeK9URKM5omqcYwWrpYA7HxLFijIweE-K7',
+            # 'notification': {
+            #     'title': message_title,
+            #     'body': message_body
+            # }
         }
 
         # json 파싱 후 requests 모듈로 FCM 서버에 요청
         result = requests.post(url, data=json.dumps(content), headers=headers)
-        print(result)
+        print('FCM 결과 : ', result)
 
         # push_service = FCMNotification(api_key=conf["fcm"]["AIzaSyACe5g4v3-XKBDRDhK2-ORKBtPb272kj4E"])
 
@@ -527,3 +545,58 @@ class CommentDetail(APIView):
             return Response({'key': True, 'message': '삭제 완료'}, status=status.HTTP_204_NO_CONTENT, content_type='application/json; charset=utf-8')
         except Member.DoesNotExist:
             return Response({'key': False, 'message': 'No data'})
+
+class OpenAPI(APIView):
+    """
+    서울시 공원 OpenAPI
+    """
+    def parkData(self, keyword):
+        key = '6344745247696b6938315042616e44'
+        url = 'http://openapi.seoul.go.kr:8088/6344745247696b6938315042616e44/json/SearchParkInfoService/1/132'
+
+        response = requests.get(url=url)
+        results = []
+        for data in response["SearchParkInfoService"]["row"]:
+            item = {}
+            if data['P_ZONE'] == keyword:
+                item['name'] = data['P_PARK']
+                item['content'] = data['P_LIST_CONTENT']
+                item['image'] = data['P_IMG']
+                item['gu'] = data['P_ZONE']
+                item['address'] = data['P_ADDR']
+                item['lot'] = data['LONGITUDE']
+                item['lat'] = data['LATITUDE']
+                results.append(item)
+        
+        return results
+    
+    """
+    서울시 전통시장 OpenAPI
+    """
+    def marketData(self, keyword):
+        key = '6344745247696b6938315042616e44'
+        url = 'http://openAPI.seoul.go.kr:8088/6344745247696b6938315042616e44/json/ListTraditionalMarket/1/330'
+
+        response = requests.get(url=url)
+        results = []
+        for data in response["ListTraditionalMarket"]["row"]:
+            item = {}
+            if data['GUNAME'] == keyword:
+                item['name'] = data['M_NAME']
+                item['content'] = ''
+                item['image'] = ''
+                item['gu'] = data['GUNAME']
+                item['address'] = data['M_ADDR']
+                item['lot'] = data['LNG']
+                item['lat'] = data['LAT']
+                results.append(item)
+        
+        return results
+
+    def get(self, request):
+        print('dddddddddddddddddddddddddddddddd')
+        keyword = self.request.GET.get('keyword', None)
+        print(keyword)
+        result = self.parkData(keyword)
+
+        return Response({'key': True, 'message': result}, content_type='application/json; charset=utf-8')
