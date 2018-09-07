@@ -70,19 +70,24 @@ class MemberList(APIView):
     def post(self, request, format=None):
         try:
             serializer = MemberSerializer(data=request.data)
-            kakaoTalkId = request.POST.get('kakaoTalkId', None)
-            faceBookId = request.POST.get('faceBookId', None)
-            if kakaoTalkId:
-                check = Member.objects.filter(kakaoTalkId=kakaoTalkId)
-                if len(check) > 0:
-                    return Response({'key': False, 'message': 'kakaotalk 아이디 중복'}, content_type='application/json; charset=utf-8')
+            # kakaoTalkId = request.POST.get('kakaoTalkId', None)
+            #faceBookId = request.POST.get('faceBookId', None)
+            # print(request.data)
+            # kakaoTalkId = request.data['kakaoTalkId']
+            # faceBookId = request.data['faceBookId']
+            # print(kakaoTalkId)
+            if 'kakaoTalkId' in request.data:
+                if request.data['kakaoTalkId'] :
+                    check = Member.objects.filter(kakaoTalkId=request.data['kakaoTalkId'])
+                    if len(check) > 0:
+                        return Response({'key': False, 'message': 'kakaotalk 아이디 중복'}, content_type='application/json; charset=utf-8')
             
-            if faceBookId:
-                check = Member.objects.filter(faceBookId=faceBookId)
-                if len(check) > 0:
-                    return Response({'key': False, 'message': 'facebook 아이디 중복'}, content_type='application/json; charset=utf-8')
+            if 'faceBookId' in request.data:
+                if request.data['faceBookId'] :
+                    check = Member.objects.filter(faceBookId=request.data['faceBookId'])
+                    if len(check) > 0:
+                        return Response({'key': False, 'message': 'facebook 아이디 중복'}, content_type='application/json; charset=utf-8')
 
-        
             if serializer.is_valid():
                 serializer.save()
                 return Response({'key': True, 'message': serializer.data}, status=status.HTTP_201_CREATED, content_type='application/json; charset=utf-8')
