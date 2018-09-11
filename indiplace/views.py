@@ -560,9 +560,10 @@ class OpenAPI(APIView):
         key = '6344745247696b6938315042616e44'
         url = 'http://openapi.seoul.go.kr:8088/6344745247696b6938315042616e44/json/SearchParkInfoService/1/132'
 
-        response = requests.get(url=url)
+        response = requests.get(url=url).json()
+        responsedata = response['SearchParkInfoService']
         results = []
-        for data in response["SearchParkInfoService"]["row"]:
+        for data in responsedata["row"]:
             item = {}
             if data['P_ZONE'] == keyword:
                 item['name'] = data['P_PARK']
@@ -583,9 +584,10 @@ class OpenAPI(APIView):
         key = '6344745247696b6938315042616e44'
         url = 'http://openAPI.seoul.go.kr:8088/6344745247696b6938315042616e44/json/ListTraditionalMarket/1/330'
 
-        response = requests.get(url=url)
+        response = requests.get(url=url).json()
+        responsedata = response['ListTraditionalMarket']
         results = []
-        for data in response["ListTraditionalMarket"]["row"]:
+        for data in responsedata["row"]:
             item = {}
             if data['GUNAME'] == keyword:
                 item['name'] = data['M_NAME']
@@ -600,9 +602,8 @@ class OpenAPI(APIView):
         return results
 
     def get(self, request):
-        print('dddddddddddddddddddddddddddddddd')
         keyword = self.request.GET.get('keyword', None)
-        print(keyword)
         result = self.parkData(keyword)
+        result.append(self.marketData(keyword))
 
         return Response({'key': True, 'message': result}, content_type='application/json; charset=utf-8')
