@@ -562,7 +562,7 @@ class OpenAPI(APIView):
         results = []
         try:
             res = requests.get(url=url)
-            print('나와라',res)
+            print('나와라',res.raise_for_status() )
             response = requests.get(url=url).json()
             # print(response)
             responsedata = response['SearchParkInfoService']
