@@ -562,9 +562,9 @@ class OpenAPI(APIView):
         try:
             response = requests.get(url=url).json()
             print(response)
+            responsedata = response['SearchParkInfoService']
         except json.decoder.JSONDecodeError:
             print("N'est pas JSON")
-        responsedata = response['SearchParkInfoService']
         results = []
         for data in responsedata["row"]:
             item = {}
