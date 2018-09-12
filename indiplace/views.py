@@ -562,9 +562,9 @@ class OpenAPI(APIView):
         results = []
         try:
             res = requests.get(url=url)
-            print(res)
+            print('나와라',res)
             response = requests.get(url=url).json()
-            print(response)
+            # print(response)
             responsedata = response['SearchParkInfoService']
             for data in responsedata["row"]:
                 item = {}
@@ -591,7 +591,7 @@ class OpenAPI(APIView):
         results = []
         try:
             res = requests.get(url=url)
-            print(res)
+            # print(res)
             response = requests.get(url=url).json()
             responsedata = response['ListTraditionalMarket']
             for data in responsedata["row"]:
