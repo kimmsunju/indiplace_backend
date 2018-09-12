@@ -561,6 +561,8 @@ class OpenAPI(APIView):
         url = 'http://openapi.seoul.go.kr:8088/6344745247696b6938315042616e44/json/SearchParkInfoService/1/132'
         results = []
         try:
+            res = requests.get(url=url)
+            print(res)
             response = requests.get(url=url).json()
             print(response)
             responsedata = response['SearchParkInfoService']
@@ -588,8 +590,9 @@ class OpenAPI(APIView):
         url = 'http://openAPI.seoul.go.kr:8088/6344745247696b6938315042616e44/json/ListTraditionalMarket/1/330'
         results = []
         try:
+            res = requests.get(url=url)
+            print(res)
             response = requests.get(url=url).json()
-            print(response)
             responsedata = response['ListTraditionalMarket']
             for data in responsedata["row"]:
                 item = {}
