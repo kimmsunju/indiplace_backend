@@ -559,24 +559,24 @@ class OpenAPI(APIView):
     def parkData(self, keyword):
         key = '6344745247696b6938315042616e44'
         url = 'http://openapi.seoul.go.kr:8088/6344745247696b6938315042616e44/json/SearchParkInfoService/1/132'
+        results = []
         try:
             response = requests.get(url=url).json()
             print(response)
             responsedata = response['SearchParkInfoService']
+            for data in responsedata["row"]:
+                item = {}
+                if data['P_ZONE'] == keyword:
+                    item['name'] = data['P_PARK']
+                    item['content'] = data['P_LIST_CONTENT']
+                    item['image'] = data['P_IMG']
+                    item['gu'] = data['P_ZONE']
+                    item['address'] = data['P_ADDR']
+                    item['lot'] = data['LONGITUDE']
+                    item['lat'] = data['LATITUDE']
+                    results.append(item)
         except json.decoder.JSONDecodeError:
             print("N'est pas JSON")
-        results = []
-        for data in responsedata["row"]:
-            item = {}
-            if data['P_ZONE'] == keyword:
-                item['name'] = data['P_PARK']
-                item['content'] = data['P_LIST_CONTENT']
-                item['image'] = data['P_IMG']
-                item['gu'] = data['P_ZONE']
-                item['address'] = data['P_ADDR']
-                item['lot'] = data['LONGITUDE']
-                item['lat'] = data['LATITUDE']
-                results.append(item)
         
         return results
     
