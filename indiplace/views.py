@@ -586,22 +586,24 @@ class OpenAPI(APIView):
     def marketData(self, keyword):
         key = '6344745247696b6938315042616e44'
         url = 'http://openAPI.seoul.go.kr:8088/6344745247696b6938315042616e44/json/ListTraditionalMarket/1/330'
-
-        response = requests.get(url=url).json()
-        responsedata = response['ListTraditionalMarket']
         results = []
-        for data in responsedata["row"]:
-            item = {}
-            if data['GUNAME'] == keyword:
-                item['name'] = data['M_NAME']
-                item['content'] = ''
-                item['image'] = ''
-                item['gu'] = data['GUNAME']
-                item['address'] = data['M_ADDR']
-                item['lot'] = data['LNG']
-                item['lat'] = data['LAT']
-                results.append(item)
-        
+        try:
+            response = requests.get(url=url).json()
+            print(response)
+            responsedata = response['ListTraditionalMarket']
+            for data in responsedata["row"]:
+                item = {}
+                if data['GUNAME'] == keyword:
+                    item['name'] = data['M_NAME']
+                    item['content'] = ''
+                    item['image'] = ''
+                    item['gu'] = data['GUNAME']
+                    item['address'] = data['M_ADDR']
+                    item['lot'] = data['LNG']
+                    item['lat'] = data['LAT']
+                    results.append(item)
+        except json.decoder.JSONDecodeError:
+            print("N'est pas JSON")
         return results
 
     def get(self, request):
