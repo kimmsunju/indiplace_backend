@@ -43,12 +43,12 @@ INSTALLED_APPS = [
     'comment'
 ]
 
-REST_FRAMEWORK = {
-    #  'EXCEPTION_HANDLER': 'utilities.helpers.api_exceptions.custom_exception_handler',
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer'
-    )
-}
+# REST_FRAMEWORK = {
+#     #  'EXCEPTION_HANDLER': 'utilities.helpers.api_exceptions.custom_exception_handler',
+#     'DEFAULT_RENDERER_CLASSES': (
+#         'rest_framework.renderers.JSONRenderer'
+#     )
+# }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
