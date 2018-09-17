@@ -250,15 +250,16 @@ class PerformanceList(APIView):
     
     def pushFCM(self, memberDevicetoken):
         # fcm 푸시 메세지 요청 주소
-        url = 'https://fcm.googleapis.com/v1/projects/indiplace-214909/messages:send'
+        #url = 'https://fcm.googleapis.com/v1/projects/indiplace-214909/messages:send'
+        url = 'https://fcm.googleapis.com/fcm/send'
         
         # 인증 정보(서버 키)를 헤더에 담아 전달
-        auth_token ='AAAAxCxWQGY:APA91bGVSxdV30mCpyqcd1qR_xDxblIgx73FEXhC0HXX3m2BmYSLUErwXPKV8IE7RcoIi0BEJ9a3c073mTYsCulw_bWsUm1xw0xrQnSHJS4Wvp7Vot2pK4n-Je1sJAUgDs_hyumR3UTX'
+        auth_token ='AAAAT0mnozs:APA91bHtZ9lwFKkSxzWxAUO_crS6PsCJXM2ehQQiuwgpmDsugrFK8W5BL27lakTLBgqOFQLhAnK_PGuvcvpfShPXTlE7b1LfNzwHvVgSYVKmQ0lCyAGtERbwREaqkVGMheeJrcGiaLaD'
         headers = {
-            'Authorization': 'Bearer ' + self._get_access_token(),
+            'Authorization': 'key=' + auth_token,
             'Content-Type': 'application/json; UTF-8',
         }
-        print(self._get_access_token())
+       # print(self._get_access_token())
 
         push_tokens = memberDevicetoken
         message_title = '즐겨찾는 가수의 공연 소식'
@@ -266,13 +267,12 @@ class PerformanceList(APIView):
 
         # 보낼 내용과 대상을 지정
         content = {
-            "message": {
-                "token": 'fejvi6bw4-I:APA91bFo7Kgs_15YnGRBxZ7xRnS7Fa9yPjxf2vQJ4fG_45F0Lt0LGOGthSucFaygGmZHFr_8W6ud_Odf6Bbh1BTvtcGSyGU7PaqnHM0rRIbeK9URKM5omqcYwWrpYA7HxLFijIweE-K7',
+                "to": 'cjFuW-1FzrI:APA91bH3GKc-gxmH91D66M2KSM0h-gxc_LtfgMOqRxWytPB7BcDNo60NV6kJOE20bXWM0E3C4Szt38e57aFbryjVvV6eR4Fin-PQLnlKnqv4qB-zB32cEBkL85_nByxUYkHPYIAJ6Qta',
                 "notification": {
                         'title': message_title,
                         'body': message_body
                     }
-            }   
+               
 
             # 'registration_ids': 'fejvi6bw4-I:APA91bFo7Kgs_15YnGRBxZ7xRnS7Fa9yPjxf2vQJ4fG_45F0Lt0LGOGthSucFaygGmZHFr_8W6ud_Odf6Bbh1BTvtcGSyGU7PaqnHM0rRIbeK9URKM5omqcYwWrpYA7HxLFijIweE-K7',
             # 'notification': {
@@ -610,8 +610,8 @@ class OpenAPI(APIView):
         return results
 
     def get(self, request):
+        print(request)
         keyword = self.request.GET.get('keyword', None)
         result = self.parkData(keyword)
-        result.append(self.marketData(keyword))
-
-        return Response({'key': True, 'message': result}, content_type='application/json; charset=utf-8')
+        result.append(self.marketData(keyword))                                                                                                                                                                                                                                                                                                                                                                           
+        return Response({'key': True, 'message': result})
