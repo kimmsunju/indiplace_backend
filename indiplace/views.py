@@ -265,31 +265,31 @@ class PerformanceList(APIView):
         message_title = '즐겨찾는 가수의 공연 소식'
         message_body = '확인해보세요^^'
 
-        # 보낼 내용과 대상을 지정
-        content = {
-                "to": 'cjFuW-1FzrI:APA91bH3GKc-gxmH91D66M2KSM0h-gxc_LtfgMOqRxWytPB7BcDNo60NV6kJOE20bXWM0E3C4Szt38e57aFbryjVvV6eR4Fin-PQLnlKnqv4qB-zB32cEBkL85_nByxUYkHPYIAJ6Qta',
-                "notification": {
-                        'title': message_title,
-                        'body': message_body
-                    }
-               
+        for token in push_tokens:
+            # 보낼 내용과 대상을 지정
+            content = {
+                    "to": token,
+                    "notification": {
+                            'title': message_title,
+                            'body': message_body
+                        }
+                
 
-            # 'registration_ids': 'fejvi6bw4-I:APA91bFo7Kgs_15YnGRBxZ7xRnS7Fa9yPjxf2vQJ4fG_45F0Lt0LGOGthSucFaygGmZHFr_8W6ud_Odf6Bbh1BTvtcGSyGU7PaqnHM0rRIbeK9URKM5omqcYwWrpYA7HxLFijIweE-K7',
-            # 'notification': {
-            #     'title': message_title,
-            #     'body': message_body
-            # }
-        }
+                # 'registration_ids': 'fejvi6bw4-I:APA91bFo7Kgs_15YnGRBxZ7xRnS7Fa9yPjxf2vQJ4fG_45F0Lt0LGOGthSucFaygGmZHFr_8W6ud_Odf6Bbh1BTvtcGSyGU7PaqnHM0rRIbeK9URKM5omqcYwWrpYA7HxLFijIweE-K7',
+                # 'notification': {
+                #     'title': message_title,
+                #     'body': message_body
+                # }
+            }
+            # json 파싱 후 requests 모듈로 FCM 서버에 요청
+            result = requests.post(url, data=json.dumps(content), headers=headers)
+            print('FCM 결과 : ', result)
 
-        # json 파싱 후 requests 모듈로 FCM 서버에 요청
-        result = requests.post(url, data=json.dumps(content), headers=headers)
-        print('FCM 결과 : ', result)
+            # push_service = FCMNotification(api_key=conf["fcm"]["AIzaSyACe5g4v3-XKBDRDhK2-ORKBtPb272kj4E"])
 
-        # push_service = FCMNotification(api_key=conf["fcm"]["AIzaSyACe5g4v3-XKBDRDhK2-ORKBtPb272kj4E"])
-
-        # # Downstream message using JSON request
-        
-        # result = push_service.notify_multiple_devices(registration_ids=push_tokens, message_title=message_title, message_body=message_body)
+            # # Downstream message using JSON request
+            
+            # result = push_service.notify_multiple_devices(registration_ids=push_tokens, message_title=message_title, message_body=message_body)
 
     def getMemberId(self, artistId):
         queryset = FavoriteArtist.objects.filter(artistId=artistId)
