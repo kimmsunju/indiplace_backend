@@ -613,5 +613,5 @@ class OpenAPI(APIView):
         print(request)
         keyword = self.request.GET.get('keyword', None)
         result = self.parkData(keyword)
-        result.append(self.marketData(keyword))                                                                                                                                                                                                                                                                                                                                                                           
+        result.extend(self.marketData(keyword))                                                                                                                                                                                                                                                                                                                                                                           
         return Response({'key': True, 'message': result})
