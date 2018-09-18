@@ -617,7 +617,7 @@ class OpenAPI(APIView):
         return Response({'key': True, 'message': result})
 
 
-class HanRiverGloss(APIView):
+class HanRiverGrass(APIView):
 
     def get(self, request):
         page = int(self. request.GET.get('page', 1))

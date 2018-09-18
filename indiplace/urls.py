@@ -20,7 +20,7 @@ urlpatterns = [
     path('comment', views.CommentList.as_view()),
     path('comment/<int:pk>', views.CommentDetail.as_view()),
     path('place', views.OpenAPI.as_view()),
-    path('gloss', views.HanRiverGloss.as_view()),
+    path('grass', views.HanRiverGrass.as_view()),
 ] 
  
 # 어떤 URL을 정적으로 추가할래? > MEDIA_URL을 static 파일 경로로 추가
