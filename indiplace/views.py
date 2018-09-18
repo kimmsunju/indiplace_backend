@@ -615,3 +615,27 @@ class OpenAPI(APIView):
         result = self.parkData(keyword)
         result.extend(self.marketData(keyword))                                                                                                                                                                                                                                                                                                                                                                           
         return Response({'key': True, 'message': result})
+
+
+class HanRiverGloss(APIView):
+
+    def get(self, request):
+        page = int(self. request.GET.get('page', 1))
+        size = 20
+        start = (page - 1) * size + 1
+        end = start + 19
+        url = 'http://openAPI.seoul.go.kr:8088/6344745247696b6938315042616e44/json/GeoInfoLawnWGS/' + str(start) + '/' + str(end)
+        
+        response = requests.get(url=url).json()
+        response = response['GeoInfoLawnWGS']
+        results = []
+        
+        for data in response["row"]:
+            item = {}
+            item['name'] = '잔디' + data['OBJECTID']
+            item['lot'] = data['LNG']
+            item['lat'] = data['LAT']
+            results.append(item)
+
+        return Response({'key': True, 'message': results})
+
