@@ -34,6 +34,7 @@ class Performance(models.Model):
     genre = models.IntegerField()
     location = models.CharField(max_length=10)
     place = models.CharField(max_length=20, blank=True)
+    description = models.CharField(max_length=200, blank=True)
     lat = models.FloatField()
     lot = models.FloatField()
 
