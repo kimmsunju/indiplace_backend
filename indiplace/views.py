@@ -248,7 +248,7 @@ class PerformanceList(APIView):
         access_token_info = credentials.get_access_token()
         return access_token_info.access_token
     
-    def pushFCM(self, memberDevicetoken):
+    def pushFCM(self, memberDevicetoken, artistName):
         # fcm 푸시 메세지 요청 주소
         #url = 'https://fcm.googleapis.com/v1/projects/indiplace-214909/messages:send'
         url = 'https://fcm.googleapis.com/fcm/send'
@@ -262,8 +262,8 @@ class PerformanceList(APIView):
        # print(self._get_access_token())
 
         push_tokens = memberDevicetoken
-        message_title = '즐겨찾는 가수의 공연 소식'
-        message_body = '확인해보세요^^'
+        message_title = '따끈따끈한 공연 소식!'
+        message_body = artistName + '님의 공연 소식을 업데이트했어요.'
 
         for token in push_tokens:
             # 보낼 내용과 대상을 지정
@@ -294,6 +294,9 @@ class PerformanceList(APIView):
     def getMemberId(self, artistId):
         queryset = FavoriteArtist.objects.filter(artistId=artistId)
         serializer = FavoriteArtistSerializer(queryset, many=True)
+        artist = ArtistInfo.objects.get(pk=artistId)
+        artistInfoSerializer = ArtistInfoSerializer(artist)
+
         memberDevicetoken = []
         for data in serializer.data:
             queryset = Member.objects.get(pk=data['memberId'])
@@ -301,8 +304,7 @@ class PerformanceList(APIView):
             memberDevicetoken.append(memberSerializer.data['deviceToken'])
         
         if len(memberDevicetoken) > 0:
-            self.pushFCM(memberDevicetoken)
-            print(memberDevicetoken)
+            self.pushFCM(memberDevicetoken, artistInfoSerializer.data['name'])
         
 
     """
